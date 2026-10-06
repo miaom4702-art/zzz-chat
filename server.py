@@ -12,6 +12,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib import error, request
 
+__version__ = "0.1.0"
+
 BASE_DIR = Path(__file__).resolve().parent
 CONFIG_PATH = BASE_DIR / "config.json"
 
@@ -173,7 +175,7 @@ def main():
     host = os.environ.get("HOST", "127.0.0.1")
     port = int(os.environ.get("PORT", "8000"))
     server = ThreadingHTTPServer((host, port), Handler)
-    print(f"绝区零 Chat 已启动 → http://{host}:{port}/")
+    print(f"绝区零 Chat v{__version__} 已启动 → http://{host}:{port}/")
     if not API_KEY:
         print("[警告] 未检测到 API Key，请设置 DASHSCOPE_API_KEY 或创建 config.json")
     print("按 Ctrl+C 停止")
