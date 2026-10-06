@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>绝区零 · 随机展示</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0f;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', sans-serif;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  .container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 40px;
+    max-width: 1200px;
+    width: 100%;
+  }
+
+  .card {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    box-shadow: 0 0 30px rgba(255, 100, 50, 0.1);
+    border: 1px solid rgba(255, 100, 50, 0.2);
+  }
+
+  .card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .card:hover {
+    transform: scale(1.08) rotate(1deg);
+    box-shadow: 0 0 60px rgba(255, 100, 50, 0.4);
+    border-color: rgba(255, 100, 50, 0.6);
+    z-index: 10;
+  }
+
+  .card:nth-child(1) { grid-column: 1; grid-row: 1; }
+  .card:nth-child(2) { grid-column: 2; grid-row: 1; }
+  .card:nth-child(3) { grid-column: 3; grid-row: 1; }
+  .card:nth-child(4) { grid-column: 1; grid-row: 2; }
+  .card:nth-child(5) { grid-column: 3; grid-row: 2; }
+
+  .overlay-text {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.15);
+    font-size: 14px;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    pointer-events: none;
+    font-weight: 300;
+  }
+
+  .glow {
+    position: fixed;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 80, 30, 0.08), transparent 70%);
+    pointer-events: none;
+    transition: all 0.1s;
+    transform: translate(-50%, -50%);
+  }
+
+  .shuffle-btn {
+    position: fixed;
+    top: 30px;
+    right: 30px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.6);
+    padding: 10px 24px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 14px;
+    letter-spacing: 2px;
+    transition: all 0.3s;
+    backdrop-filter: blur(10px);
+    z-index: 100;
+  }
+
+  .shuffle-btn:hover {
+    background: rgba(255, 80, 30, 0.2);
+    border-color: rgba(255, 80, 30, 0.4);
+    color: #fff;
+    box-shadow: 0 0 30px rgba(255, 80, 30, 0.2);
+  }
+
+  .fullscreen-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.92);
+    backdrop-filter: blur(20px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    cursor: pointer;
+  }
+
+  .fullscreen-overlay.active {
+    display: flex;
+  }
+
+  .fullscreen-overlay img {
+    max-width: 90vw;
+    max-height: 90vh;
+    border-radius: 12px;
+    box-shadow: 0 0 80px rgba(255, 100, 50, 0.3);
+  }
+
+  .corner-tl, .corner-tr, .corner-bl, .corner-br {
+    position: fixed;
+    width: 60px;
+    height: 60px;
+    pointer-events: none;
+    opacity: 0.15;
+  }
+  .corner-tl { top: 20px; left: 20px; border-top: 1px solid #ff5030; border-left: 1px solid #ff5030; }
+  .corner-tr { top: 20px; right: 20px; border-top: 1px solid #ff5030; border-right: 1px solid #ff5030; }
+  .corner-bl { bottom: 20px; left: 20px; border-bottom: 1px solid #ff5030; border-left: 1px solid #ff5030; }
+  .corner-br { bottom: 20px; right: 20px; border-bottom: 1px solid #ff5030; border-right: 1px solid #ff5030; }
+
+  @media (max-width: 768px) {
+    .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 20px; }
+    .card:nth-child(4) { grid-column: 1; grid-row: 2; }
+    .card:nth-child(5) { grid-column: 2; grid-row: 2; }
+  }
+</style>
+</head>
+<body>
+
+<div class="corner-tl"></div>
+<div class="corner-tr"></div>
+<div class="corner-bl"></div>
+<div class="corner-br"></div>
+
+<div class="glow" id="glow"></div>
+
+<button class="shuffle-btn" onclick="shuffleCards()">✦ 随机打乱</button>
+
+<div class="container">
+  <div class="grid" id="grid"></div>
+</div>
+
+<div class="overlay-text">Zenless Zone Zero · 绝区零</div>
+
+<div class="fullscreen-overlay" id="fullscreen" onclick="closeFullscreen()">
+  <img id="fullscreenImg" src="" alt="">
+</div>
+
+<script>
+  const files = [
+    '1b189e8fae68003d75bbb810e7ddd2ff160038100.gif@1052w_!web-dynamic.webp',
+    '4e64bf5426d330b88354099df78457df160038100.gif@1052w_!web-dynamic.webp',
+    '746ea0f5b18fe7dd37b01c8aa52c14fe160038100.gif@1052w_!web-dynamic.webp',
+    'd108c28c8bef2f9488f9036618918858160038100.gif@1052w_!web-dynamic.webp',
+    'e23942cefe334056e1b26e65b5a2eae8160038100.gif@1052w_!web-dynamic.webp'
+  ];
+
+  const grid = document.getElementById('grid');
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function renderCards(order) {
+    grid.innerHTML = '';
+    order.forEach((f, i) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.style.animationDelay = `${i * 0.08}s`;
+      card.innerHTML = `<img src="${f}" alt="绝区零素材 ${i+1}" draggable="false">`;
+      card.onclick = () => openFullscreen(f);
+      grid.appendChild(card);
+    });
+  }
+
+  function shuffleCards() {
+    const shuffled = shuffle([...files]);
+    renderCards(shuffled);
+  }
+
+  function openFullscreen(src) {
+    document.getElementById('fullscreenImg').src = src;
+    document.getElementById('fullscreen').classList.add('active');
+  }
+
+  function closeFullscreen() {
+    document.getElementById('fullscreen').classList.remove('active');
+  }
+
+  function init() {
+    const shuffled = shuffle([...files]);
+    renderCards(shuffled);
+  }
+
+  init();
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeFullscreen();
+    if (e.key === 'r' || e.key === 'R') shuffleCards();
+  });
+
+  window.addEventListener('mousemove', e => {
+    const glow = document.getElementById('glow');
+    glow.style.left = e.clientX + 'px';
+    glow.style.top = e.clientY + 'px';
+  });
+</script>
+
+</body>
+</html>

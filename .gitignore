@@ -1,0 +1,14 @@
+# 本地密钥配置，禁止提交
+config.json
+.env
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+
+# 系统 / 编辑器
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
